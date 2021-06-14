@@ -87,6 +87,10 @@ function doTheMuffling() {
     if (ambiSounds && ambiSounds.length > 0) {
         for (var i = 0; i < ambiSounds.length; i++) {
             const snd = ambiSounds[i];
+
+            if (!snd.data.easing) continue;
+            if (snd.data.type != 'g') continue;
+
             const sndMaxDist = snd.data.radius;
             const sndPos = {
                 x: snd.data.x,
@@ -98,23 +102,31 @@ function doTheMuffling() {
             // console.log('walls-have-ears | Sound ' + i, sndPos, sndMaxDist, sndDist);
 
             if (sndMaxDist >= sndDist) {
-                let sndSource = null;
-                if (!sndHowl.playing()) {
-                    sndHowl.play();
-                    sndSource = sndHowl._sounds[0]._node.bufferSource;
-                    console.log('walls-have-ears | Sound Needs to SOUND MUFFLED!', sndHowl);
-                    sndSource.disconnect(0);
-                    audioMuffler.disconnect(0);
-                    sndSource.connect(audioMuffler);
-                    audioMuffler.connect(audioOutput);
-                    sndHowl.play();
-                } else {
-                    sndSource = sndHowl._sounds[0]._node.bufferSource;
-                    console.log('walls-have-ears | Sound Is playing, you be played normally', sndHowl.playing());
-                    sndSource.disconnect(0);
-                    audioMuffler.disconnect(0);
-                    sndSource.connect(audioOutput);
-                }
+                const closeness = 1.0 - (sndDist / sndMaxDist);
+                const volume = closeness * closeness;
+                console.log('walls-have-ears | setting volume to ', volume);
+                sndHowl.volume(volume);
+
+                //if (!sndHowl.playing()) {
+                //    console.log('walls-have-ears | starting sound');
+                //    sndHowl.play();
+                //}
+                //if (!sndHowl.playing()) {
+                //    sndHowl.play();
+                //    sndSource = sndHowl._sounds[0]._node.bufferSource;
+                //    console.log('walls-have-ears | Sound Needs to SOUND MUFFLED!', sndHowl);
+                //    sndSource.disconnect(0);
+                //    audioMuffler.disconnect(0);
+                //    sndSource.connect(audioMuffler);
+                //    audioMuffler.connect(audioOutput);
+                //    sndHowl.play();
+                //} else {
+                //    sndSource = sndHowl._sounds[0]._node.bufferSource;
+                //    console.log('walls-have-ears | Sound Is playing, you be played normally', sndHowl.playing());
+                //    sndSource.disconnect(0);
+                //    audioMuffler.disconnect(0);
+                //    sndSource.connect(audioOutput);
+                //}
             } else {
                 if (sndHowl.playing()) {
                     console.log('walls-have-ears | Stopping sound, weird!');
